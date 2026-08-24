@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커뮤니티 · 노하우 공유 — VIBE LEARN @ 현대엔지비</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html"><span class="logo">✦</span><span>VIBE LEARN <small>@ 현대엔지비</small></span></a>
+    <nav class="nav-links">
+      <a href="learn.html">① 학습하기</a>
+      <a href="community.html" class="active">② 커뮤니티</a>
+      <a href="#" onclick="openModal();return false;" class="btn btn-vibe btn-sm">＋ 노하우 공유</a>
+    </nav>
+    <div class="auth-area" id="authArea"></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+  </div>
+</header>
+
+<div class="wrap subhero">
+  <div class="breadcrumb"><a href="index.html">홈</a> › 커뮤니티</div>
+  <span class="tag" style="color:var(--f3)">DEVICE 02 · 유지 · RETAIN</span>
+  <h1>혼자 하지 마세요.<br>동료의 자동화를 그대로 가져다 쓰세요.</h1>
+  <p>학습하면서 직접 만든 자동화 사례, 잘 되는 프롬프트, 실제 툴을 공유하는 공간입니다. 복사해서 바로 쓰고, 내 것도 나눠주세요.</p>
+</div>
+
+<section class="wrap section" style="padding-top:16px">
+  <div class="comm-layout">
+
+    <!-- 사이드바 필터 -->
+    <aside class="side">
+      <div class="card">
+        <div style="font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-bottom:10px">부서별</div>
+        <div id="deptFilters"></div>
+      </div>
+      <div class="card" style="margin-top:16px;background:var(--f3-soft);border-color:transparent">
+        <b style="font-size:15px">🌱 이번 주 나눔왕</b>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">가장 많은 좋아요를 받은 노하우를 공유한 임직원에게 배지가 수여됩니다.</p>
+      </div>
+    </aside>
+
+    <!-- 피드 -->
+    <div>
+      <div class="comm-toolbar">
+        <div>
+          <b style="font-size:20px" id="feedTitle">전체 노하우</b>
+          <span class="muted" style="font-size:14px" id="feedCount"></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select id="sortSel" onchange="render()" style="padding:9px 14px;border:1px solid var(--line-2);border-radius:10px;font-family:var(--font);font-size:14px;font-weight:600;color:var(--ink-2)">
+            <option value="new">최신순</option>
+            <option value="like">좋아요순</option>
+          </select>
+          <button class="btn btn-vibe btn-sm" onclick="openModal()">＋ 노하우 공유</button>
+        </div>
+      </div>
+      <div class="feed" id="feed"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 작성 모달 -->
+<div class="modal-back" id="modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 id="modalTitle">노하우 공유하기</h3>
+      <button class="iconbtn" onclick="closeModal()" style="font-size:22px">✕</button>
+    </div>
+    <p class="muted" style="font-size:14px;margin-top:6px">동료에게 도움이 될 자동화 사례·프롬프트·툴을 남겨주세요.</p>
+
+    <div class="field">
+      <label>카테고리</label>
+      <div class="seg">
+        <label><input type="radio" name="cat" value="자동화사례" checked><span>📊 자동화 사례</span></label>
+        <label><input type="radio" name="cat" value="프롬프트"><span>💬 프롬프트</span></label>
+        <label><input type="radio" name="cat" value="툴공유"><span>🔧 툴 공유</span></label>
+      </div>
+    </div>
+    <div class="field"><label>제목</label><input id="fTitle" placeholder="예: 주간 실적 자동 취합 봇"></div>
+    <div class="field" style="display:flex;gap:12px">
+      <div style="flex:1"><label>이름/직급</label><input id="fAuthor" placeholder="예: 김대리"></div>
+      <div style="flex:1"><label>부서</label><input id="fDept" placeholder="예: 영업기획팀"></div>
+    </div>
+    <div class="field"><label>설명 <span class="muted" style="font-weight:400">(어떤 내용인지)</span></label><textarea id="fBody" placeholder="어떤 업무를 어떻게 자동화했는지, 얼마나 시간이 줄었는지 적어주세요."></textarea></div>
+    <div class="field"><label>사용한 툴 <span class="muted" style="font-weight:400">(선택 — 쉼표로 구분)</span></label><input id="fTools" placeholder="예: Excel, Claude, Python"></div>
+    <div class="field"><label>프롬프트 / 코드 <span class="muted" style="font-weight:400">(선택 — 붙여넣기)</span></label><textarea id="fCode" placeholder="복사해서 바로 쓸 수 있는 프롬프트나 코드를 붙여넣으세요"></textarea></div>
+
+    <div style="display:flex;gap:10px;margin-top:22px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">취소</button>
+      <button class="btn btn-vibe" style="flex:2" id="submitBtn" onclick="submitPost()">공유하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 상세보기 모달 -->
+<div class="modal-back" id="detailModal">
+  <div class="modal" id="detailBody"></div>
+</div>
+
+<footer class="footer">
+  <div class="wrap row">
+    <a class="brand" href="index.html"><span class="logo">✦</span><span>VIBE LEARN <small>@ 현대엔지비</small></span></a>
+    <div class="links"><a href="learn.html">학습하기</a><a href="community.html">커뮤니티</a></div>
+  </div>
+  <div class="wrap" style="margin-top:20px"><span class="copy">© <span data-year></span> 현대엔지비 (Hyundai NGV) · 내부용 프로토타입 · 로그인 후 작성한 글은 계정에 저장되어 모두에게 공유됩니다</span></div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/firebase-config.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+/* ================= 시드 데이터 ================= */
+const SEED = [
+  { id:'s1', cat:'자동화사례', title:'주간 실적 자동 취합 봇', author:'김대리', dept:'영업기획팀',
+    body:'부서별로 흩어진 엑셀을 한 폴더에 넣으면 자동으로 취합해 부서별 합계와 그래프까지 만들어줍니다. 매주 4시간 걸리던 게 15분으로 줄었어요.',
+    tools:['Excel','Claude','Python'],
+    code:'이 폴더에 있는 엑셀 파일들을 하나로 합치고,\n부서별 합계를 낸 표를 새 엑셀로 만들어줘.\n금액은 천 단위마다 콤마를 찍고, 부서별 막대그래프도 넣어줘.', likes:42, ts: Date.now()-86400000*2 },
+  { id:'s2', cat:'프롬프트', title:'회의록 → 핵심요약·To-Do 정리 프롬프트', author:'이과장', dept:'HRD팀',
+    body:'녹취 텍스트를 붙여넣으면 결정사항/할일/담당자를 표로 정리해줍니다. 그대로 복사해서 쓰세요.',
+    tools:['Claude','ChatGPT'],
+    code:'아래 회의 녹취록을 읽고 다음 형식으로 정리해줘.\n\n1) 핵심 결정사항 (불릿 3~5개)\n2) 할 일 목록 (담당자 / 기한 포함, 표로)\n3) 다음 회의 안건\n\n말투는 간결한 개조식으로.\n\n[회의록 붙여넣기]', likes:31, ts: Date.now()-86400000*4 },
+  { id:'s3', cat:'툴공유', title:'PDF 일괄 변환·병합 도구', author:'박주임', dept:'구매팀',
+    body:'여러 PDF를 드래그하면 이름 규칙 변경·워터마크·병합을 원클릭으로. 사내 공용 폴더 /tools/pdfkit 에 올려뒀습니다.',
+    tools:['Python','VS Code'],
+    code:'# 사용법\n1. 변환할 PDF들을 input 폴더에 넣기\n2. run.bat 더블클릭\n3. output 폴더에서 결과 확인\n\n# 옵션 (config.txt)\nmerge = true       # 하나로 병합\nprefix = 2026_구매_  # 파일명 앞에 붙일 규칙', likes:27, ts: Date.now()-86400000*6 },
+  { id:'s4', cat:'프롬프트', title:'거래처 문의 메일 답변 초안 프롬프트', author:'최사원', dept:'영업지원팀',
+    body:'자주 오는 문의 유형에 맞춰 정중한 답변 초안을 만들어줍니다. 톤을 "정중하고 간결하게"로 고정한 게 포인트.',
+    tools:['Claude'],
+    code:'너는 우리 회사 영업지원 담당자야. 아래 고객 문의에 대해 정중하고 간결한 한국어 답변 초안을 작성해줘.\n- 첫 문장은 감사 인사\n- 핵심 답변을 먼저, 부연은 뒤에\n- 마지막에 추가 문의 안내\n\n[고객 문의 붙여넣기]', likes:19, ts: Date.now()-86400000*8 },
+  { id:'s5', cat:'자동화사례', title:'설문 응답 실시간 집계·알림', author:'정대리', dept:'교육운영팀',
+    body:'구글폼 응답이 들어올 때마다 자동 집계하고, 만족도가 기준 미만이면 담당자에게 바로 알림이 갑니다. 교육 품질 관리가 훨씬 빨라졌어요.',
+    tools:['Google Forms','Apps Script','Slack'],
+    code:'구글폼 응답 시트가 업데이트될 때마다\n만족도 평균을 계산하고, 평균이 4.0 미만이면\n담당자 슬랙 채널로 알림을 보내는 스크립트를 만들어줘.', likes:23, ts: Date.now()-86400000*10 },
+  { id:'s6', cat:'툴공유', title:'사내 용어 자동 번역·용어집 봇', author:'한과장', dept:'글로벌사업팀',
+    body:'영문 문서에서 우리 회사 표준 용어로 자동 치환해주는 봇입니다. 용어 일관성이 확 좋아졌습니다.',
+    tools:['Claude','Excel'],
+    code:'첨부한 용어집(엑셀)을 기준으로,\n아래 영문 문서에서 표준 용어로 바꿔야 할 단어를 찾아\n표준 용어로 치환한 새 문서를 만들어줘.\n\n[문서 붙여넣기]', likes:15, ts: Date.now()-86400000*12 }
+];
+
+/* ================= 상태 ================= */
+let posts = SEED.slice();
+let liked = JSON.parse(localStorage.getItem('ngv_learn_liked') || '{}');
+let filter = 'all';
+let deptFilter = 'all';
+let editingId = null;
+
+/* Firestore에 저장된 사용자 글을 실시간으로 받아와 SEED와 합침
+   ※ 이 학습 플랫폼은 원본 바이브코딩 사이트와 같은 Firebase 프로젝트(로그인 계정)를 쓰지만,
+      글 데이터는 섞이지 않도록 별도 컬렉션(learn_posts)을 사용합니다. */
+db.collection('learn_posts').orderBy('createdAt', 'desc').onSnapshot(snap => {
+  const cloudPosts = snap.docs.map(d => {
+    const v = d.data();
+    return {
+      id: d.id, cat: v.cat, title: v.title, author: v.author, dept: v.dept,
+      body: v.body, tools: v.tools || [], code: v.code || '', likes: v.likes || 0,
+      ts: v.createdAt ? v.createdAt.toMillis() : Date.now(), uid: v.uid, cloud: true
+    };
+  });
+  posts = SEED.concat(cloudPosts);
+  counts(); renderDeptFilters(); render();
+}, () => toast('노하우 목록을 불러오지 못했어요'));
+
+/* ================= 렌더 ================= */
+function counts() {
+  const c = { all: posts.length, 자동화사례:0, 프롬프트:0, 툴공유:0 };
+  posts.forEach(p => c[p.cat]++);
+  Object.keys(c).forEach(k => { const el = document.getElementById('cnt-'+k); if (el) el.textContent = c[k]; });
+}
+
+function esc(s){ return (s||'').replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function ago(ts){ const d = Math.floor((Date.now()-ts)/86400000); return d<=0?'오늘':d+'일 전'; }
+
+function render() {
+  const feed = document.getElementById('feed');
+  let list = posts.filter(p => (filter === 'all' || p.cat === filter) && (deptFilter === 'all' || p.dept === deptFilter));
+  const sort = document.getElementById('sortSel').value;
+  list.sort((a,b) => sort === 'like' ? b.likes - a.likes : b.ts - a.ts);
+
+  let title = filter === 'all' ? '전체 노하우' : filter;
+  if (deptFilter !== 'all') title += ` · ${deptFilter}`;
+  document.getElementById('feedTitle').textContent = title;
+  document.getElementById('feedCount').textContent = `· ${list.length}건`;
+
+  feed.innerHTML = '';
+  if (!list.length) { feed.innerHTML = '<p class="muted" style="grid-column:1/-1;padding:40px 0;text-align:center">해당 조건에 맞는 노하우가 아직 없어요. 첫 노하우를 공유해보세요!</p>'; return; }
+
+  list.forEach(p => {
+    const isLiked = !!liked[p.id];
+    const toolChips = (p.tools && p.tools.length)
+      ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px">${p.tools.map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')}</div>`
+      : '';
+    const el = document.createElement('article');
+    el.className = 'post';
+    el.style.cursor = 'pointer';
+    el.onclick = () => openDetail(p.id);
+    el.innerHTML = `
+      <span class="cat" style="background:var(--f1-soft);color:var(--f1-ink)">🏢 ${esc(p.dept)}</span>
+      <h4>${esc(p.title)}</h4>
+      <div class="by">${esc(p.author)} · ${esc(p.cat)} · ${ago(p.ts)}</div>
+      <p class="excerpt">${esc(p.body)}</p>
+      ${toolChips}
+      <div class="post-foot">
+        <button class="iconbtn ${isLiked?'liked':''}" onclick="event.stopPropagation();toggleLike('${p.id}')">${isLiked?'♥':'♡'} <span>${p.likes}</span></button>
+        <span class="iconbtn" style="margin-left:auto;color:var(--f3);pointer-events:none">자세히 보기 →</span>
+      </div>`;
+    feed.appendChild(el);
+  });
+}
+
+function setFilter(cat) {
+  filter = cat;
+  document.querySelectorAll('.filter-btn[data-cat]').forEach(b => b.classList.toggle('on', b.dataset.cat === cat));
+  render();
+}
+
+/* 부서별 필터 */
+function renderDeptFilters() {
+  const box = document.getElementById('deptFilters');
+  const map = {};
+  posts.forEach(p => { map[p.dept] = (map[p.dept] || 0) + 1; });
+  const depts = Object.keys(map).sort((a,b) => a.localeCompare(b, 'ko'));
+  let html = `<button class="filter-btn ${deptFilter==='all'?'on':''}" onclick="setDept('all')"><span>전체 부서</span><span class="n">${posts.length}</span></button>`;
+  depts.forEach(d => {
+    html += `<button class="filter-btn ${deptFilter===d?'on':''}" onclick="setDept('${esc(d)}')"><span>🏢 ${esc(d)}</span><span class="n">${map[d]}</span></button>`;
+  });
+  box.innerHTML = html;
+}
+function setDept(d) { deptFilter = d; renderDeptFilters(); render(); }
+
+/* 상세보기 */
+function openDetail(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  const isLiked = !!liked[p.id];
+  const tools = (p.tools && p.tools.length)
+    ? p.tools.map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')
+    : '<span class="muted" style="font-size:14px">등록된 툴 정보가 없어요</span>';
+  const prompt = p.code
+    ? `<div class="codebox" style="max-height:none">${esc(p.code)}</div><button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="copyPostCode('${p.id}')">⧉ 프롬프트 복사</button>`
+    : '<span class="muted" style="font-size:14px">등록된 프롬프트/코드가 없어요</span>';
+  const lbl = 'font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--muted)';
+  const isOwner = p.cloud && auth.currentUser && p.uid === auth.currentUser.uid;
+  const ownerBtns = isOwner
+    ? `<button class="btn btn-ghost btn-sm" onclick="editPost('${p.id}')">✏️ 수정</button>
+       <button class="btn btn-ghost btn-sm" onclick="deletePost('${p.id}')">🗑 삭제</button>`
+    : '';
+  document.getElementById('detailBody').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <span class="cat" style="background:var(--f1-soft);color:var(--f1-ink)">🏢 ${esc(p.dept)}</span>
+      <button class="iconbtn" onclick="closeDetail()" style="font-size:22px">✕</button>
+    </div>
+    <h3 style="margin-top:12px">${esc(p.title)}</h3>
+    <div class="by" style="margin-top:6px">${esc(p.author)} · ${esc(p.cat)} · ${ago(p.ts)} · ♥ ${p.likes}</div>
+    <div style="margin-top:24px"><div style="${lbl}">📋 어떤 내용인가요</div><p style="margin-top:8px;font-size:15px;line-height:1.7;color:var(--ink-2);white-space:pre-wrap">${esc(p.body)}</p></div>
+    <div style="margin-top:22px"><div style="${lbl}">🔧 사용한 툴</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">${tools}</div></div>
+    <div style="margin-top:22px"><div style="${lbl}">💬 작성한 프롬프트 / 코드</div><div style="margin-top:10px">${prompt}</div></div>
+    <div style="display:flex;gap:10px;margin-top:26px;align-items:center">
+      <button class="iconbtn ${isLiked?'liked':''}" style="border:1px solid var(--line-2)" onclick="toggleLike('${p.id}');openDetail('${p.id}')">${isLiked?'♥':'♡'} 좋아요 <span>${p.likes}</span></button>
+      ${ownerBtns}
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="closeDetail()">닫기</button>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail() { document.getElementById('detailModal').classList.remove('open'); }
+document.getElementById('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') closeDetail(); });
+
+function editPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  closeDetail();
+  openModal(p);
+}
+function deletePost(id) {
+  if (!confirm('정말 삭제할까요?')) return;
+  db.collection('learn_posts').doc(id).delete().then(() => { closeDetail(); toast('삭제했습니다'); });
+}
+
+function copyPostCode(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p || !p.code) return;
+  copyText(p.code, (p.cat === '프롬프트' ? '프롬프트를' : '내용을') + ' 복사했습니다');
+}
+
+function toggleLike(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  const inc = liked[id] ? -1 : 1;
+  if (liked[id]) { delete liked[id]; } else { liked[id] = true; }
+  localStorage.setItem('ngv_learn_liked', JSON.stringify(liked));
+  if (p.cloud) {
+    db.collection('learn_posts').doc(id).update({ likes: firebase.firestore.FieldValue.increment(inc) });
+  } else {
+    p.likes += inc;
+    render();
+  }
+}
+
+/* ================= 작성 ================= */
+function openModal(prefill) {
+  if (!AuthApp.requireLogin('노하우를 공유하려면 로그인해주세요')) return;
+  editingId = (prefill && prefill.id) || null;
+  document.getElementById('modalTitle').textContent = editingId ? '노하우 수정하기' : '노하우 공유하기';
+  document.getElementById('submitBtn').textContent = editingId ? '수정하기' : '공유하기';
+  if (prefill) {
+    document.querySelector(`input[name="cat"][value="${prefill.cat}"]`).checked = true;
+    document.getElementById('fTitle').value = prefill.title;
+    document.getElementById('fAuthor').value = prefill.author;
+    document.getElementById('fDept').value = prefill.dept;
+    document.getElementById('fBody').value = prefill.body;
+    document.getElementById('fTools').value = (prefill.tools || []).join(', ');
+    document.getElementById('fCode').value = prefill.code || '';
+  } else {
+    ['fTitle','fAuthor','fDept','fBody','fTools','fCode'].forEach(id => document.getElementById(id).value = '');
+    document.querySelector('input[name="cat"][value="자동화사례"]').checked = true;
+    if (auth.currentUser && auth.currentUser.displayName) document.getElementById('fAuthor').value = auth.currentUser.displayName;
+  }
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); editingId = null; }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+function submitPost() {
+  if (!AuthApp.requireLogin('노하우를 공유하려면 로그인해주세요')) return;
+  const title = document.getElementById('fTitle').value.trim();
+  const author = document.getElementById('fAuthor').value.trim() || auth.currentUser.displayName || '익명';
+  const dept = document.getElementById('fDept').value.trim() || '현대엔지비';
+  const body = document.getElementById('fBody').value.trim();
+  const code = document.getElementById('fCode').value.trim();
+  const tools = document.getElementById('fTools').value.split(',').map(s => s.trim()).filter(Boolean);
+  const cat = document.querySelector('input[name="cat"]:checked').value;
+  if (!title || !body) { toast('제목과 설명을 입력해주세요'); return; }
+
+  const data = { cat, title, author, dept, body, tools, code, uid: auth.currentUser.uid };
+  const wasEditing = editingId;
+  const promise = wasEditing
+    ? db.collection('learn_posts').doc(wasEditing).update(data)
+    : db.collection('learn_posts').add(Object.assign({}, data, { likes: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() }));
+
+  promise.then(() => {
+    closeModal();
+    toast(wasEditing ? '수정했습니다' : '노하우를 공유했습니다! 🎉');
+  }).catch(e => toast('저장 중 문제가 발생했어요: ' + e.message));
+}
+
+counts(); renderDeptFilters(); render();
+</script>
+</body>
+</html>

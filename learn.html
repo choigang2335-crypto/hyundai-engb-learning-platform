@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학습하기 · 챕터별 영상 — VIBE LEARN @ 현대엔지비</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html"><span class="logo">✦</span><span>VIBE LEARN <small>@ 현대엔지비</small></span></a>
+    <nav class="nav-links">
+      <a href="learn.html" class="active">① 학습하기</a>
+      <a href="community.html">② 커뮤니티</a>
+      <a href="community.html" class="btn btn-vibe btn-sm">노하우 보러가기</a>
+    </nav>
+    <div class="auth-area" id="authArea"></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+  </div>
+</header>
+
+<div class="wrap subhero">
+  <div class="breadcrumb"><a href="index.html">홈</a> › 학습 장치</div>
+  <span class="tag" style="color:var(--f2)">DEVICE 01 · 학습 · LEARN</span>
+  <h1>5개 챕터로 끝내는<br>바이브 코딩 첫걸음</h1>
+  <p>챕터를 누르면 영상이 재생되고, 아래 타임라인을 누르면 그 장면으로 바로 이동합니다. 로그인하면 어디까지 봤는지 계정에 저장됩니다.</p>
+</div>
+
+<section class="wrap section" style="padding-top:16px">
+  <div class="course-layout">
+
+    <!-- 사이드바: 챕터 목록 -->
+    <aside>
+      <div class="chapter-list" id="chapterList"></div>
+      <div class="course-progress">
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--ink-2)">
+          <span>내 진도</span><span id="progressLabel">0 / 5</span>
+        </div>
+        <div class="bar"><i id="progressBar" style="width:0%"></i></div>
+      </div>
+    </aside>
+
+    <!-- 메인: 영상 + 타임라인 -->
+    <div>
+      <div class="panel" style="padding:0;overflow:hidden">
+        <div class="video-wrap" id="videoWrap"></div>
+      </div>
+
+      <div class="panel" style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div>
+            <h3 id="chTitle">-</h3>
+            <p class="sub" id="chDesc" style="margin-top:6px"></p>
+          </div>
+          <button class="btn btn-vibe btn-sm" id="doneBtn" onclick="markDone()">✓ 이 챕터 완료로 표시</button>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:18px">
+        <button class="btn btn-ghost btn-sm" id="prevBtn" onclick="gotoAdjacent(-1)">← 이전 챕터</button>
+        <button class="btn btn-ghost btn-sm" id="nextBtn" onclick="gotoAdjacent(1)">다음 챕터 →</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap row">
+    <a class="brand" href="index.html"><span class="logo">✦</span><span>VIBE LEARN <small>@ 현대엔지비</small></span></a>
+    <div class="links"><a href="learn.html">학습하기</a><a href="community.html">커뮤니티</a></div>
+  </div>
+  <div class="wrap" style="margin-top:20px"><span class="copy">© <span data-year></span> 현대엔지비 (Hyundai NGV) · 내부용 프로토타입</span></div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/firebase-config.js"></script>
+<script src="assets/auth.js"></script>
+<script>
+/* ================= 챕터 데이터 =================
+   videoUrl을 실제 영상 링크로 채우면 바로 재생됩니다. 지금은 준비 전이라 비워둡니다. */
+const CHAPTERS = [
+  {
+    id: 'ch1', title: '1. 바이브 코딩이 뭔가요', duration: '04:12', videoUrl: '',
+    desc: '코드를 몰라도 말로 시켜서 결과물을 만드는 방식, 바이브 코딩의 기본 개념을 설명합니다.',
+    timeline: [
+      { t: 0,   label: '00:00', text: '바이브 코딩은 코드를 직접 짜는 대신, AI에게 평소 말투로 "이렇게 해줘"라고 시켜서 작업을 만드는 방식입니다.' },
+      { t: 45,  label: '00:45', text: '문법을 몰라도 원하는 결과를 설명만 하면, AI가 실제로 동작하는 결과물을 만들어줍니다.' },
+      { t: 110, label: '01:50', text: '예시: 매주 여러 부서에서 오는 엑셀 파일을 하나로 합치는 일도 "이 폴더 엑셀들 합쳐줘"라고 말하면 끝입니다.' },
+      { t: 190, label: '03:10', text: '이 강의는 세팅 → 안전 원칙 → 잘 시키는 법 → 막혔을 때 대처법 → 실습 순서로 이어집니다.' }
+    ]
+  },
+  {
+    id: 'ch2', title: '2. 3분 세팅 가이드', duration: '05:30', videoUrl: '',
+    desc: 'VS Code 설치부터 AI 도구 연결, 첫 작업 폴더를 여는 것까지 4단계로 안내합니다.',
+    timeline: [
+      { t: 0,   label: '00:00', text: '1단계, VS Code를 설치합니다. 검색해서 공식 사이트에서 내려받고 "다음"만 누르면 됩니다.' },
+      { t: 70,  label: '01:10', text: '2단계, 왼쪽 확장 메뉴에서 사내 승인 AI 어시스턴트를 설치하고 승인 계정으로 로그인합니다.' },
+      { t: 160, label: '02:40', text: '3단계, 바탕화면에 폴더를 만들고 "폴더 열기"로 엽니다. 여기가 앞으로의 작업실입니다.' },
+      { t: 260, label: '04:20', text: '4단계, 채팅창에 "이런 거 만들어줘"라고 입력하면 끝입니다. 결과를 보고 고칠 점을 다시 말하면 됩니다.' }
+    ]
+  },
+  {
+    id: 'ch3', title: '3. 안전하게 쓰는 법', duration: '03:48', videoUrl: '',
+    desc: '"밖에 나가면 안 되는 정보는 AI에도 넣지 않는다" — 딱 하나의 원칙과 예시들을 다룹니다.',
+    timeline: [
+      { t: 0,   label: '00:00', text: '원칙은 하나입니다. 밖에 나가면 안 되는 정보는 AI에도 넣지 않습니다.' },
+      { t: 55,  label: '00:55', text: '이렇게 쓰세요: 공개 정보, 가상·예시 데이터, 내 개인 업무 자동화, 그리고 결과물은 항상 사람이 검토합니다.' },
+      { t: 140, label: '02:20', text: '절대 안 됩니다: 고객 개인정보, 미공개 사업·설계 자료, 사내 비밀번호·인증키, 검토 없는 외부 전송입니다.' },
+      { t: 205, label: '03:25', text: '애매하면 넣지 마세요. 판단이 안 서면 담당 부서나 보안팀에 먼저 확인하세요.' }
+    ]
+  },
+  {
+    id: 'ch4', title: '4. 잘 시키는 법', duration: '04:30', videoUrl: '',
+    desc: '"무엇을 / 어떻게 / 어떤 형태로"만 붙이면 결과가 확 좋아지는 프롬프트 작성 요령입니다.',
+    timeline: [
+      { t: 0,   label: '00:00', text: '비법은 없습니다. 무엇을, 어떻게, 어떤 형태로 — 이 세 가지만 붙이면 됩니다.' },
+      { t: 60,  label: '01:00', text: '아쉬운 예시: "엑셀 정리해줘". 이렇게만 말하면 AI도 뭘 원하는지 추측해야 합니다.' },
+      { t: 130, label: '02:10', text: '좋은 예시: "이 폴더 엑셀들을 하나로 합치고, 부서별 합계를 낸 표를 만들어줘. 금액은 천 단위 콤마를 찍어줘."' },
+      { t: 220, label: '03:40', text: '회의록 요약도 마찬가지입니다. 결정사항·할 일·다음 안건, 이렇게 형태를 정해주면 바로 됩니다.' }
+    ]
+  },
+  {
+    id: 'ch5', title: '5. 막히면 이렇게', duration: '03:15', videoUrl: '',
+    desc: '에러가 나거나 결과가 이상할 때 풀어가는 3단계 대처법입니다.',
+    timeline: [
+      { t: 0,   label: '00:00', text: '안 된다고 겁먹지 마세요. 대부분 이 3단계 안에서 풀립니다.' },
+      { t: 50,  label: '00:50', text: '1단계, 에러 문구를 그대로 복사해서 붙여넣고 "이 에러 고쳐줘"라고 하세요. 이해할 필요 없습니다.' },
+      { t: 120, label: '02:00', text: '2단계, "다른 방법으로 다시 해줘"라고 하거나 상황을 더 자세히 설명하세요.' },
+      { t: 170, label: '02:50', text: '3단계, 2~3번 반복해도 안 풀리면 커뮤니티에 질문하세요. 혼자 오래 붙드는 게 가장 비효율적입니다.' }
+    ]
+  }
+];
+
+let currentId = CHAPTERS[0].id;
+let completed = {};
+
+function chapterIndex(id) { return CHAPTERS.findIndex(c => c.id === id); }
+function currentChapter() { return CHAPTERS[chapterIndex(currentId)]; }
+
+function fmtTime(sec) {
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+/* ================= 진도 (Firestore) ================= */
+function loadProgress() {
+  if (!auth.currentUser) { completed = {}; renderAll(); return; }
+  db.collection('users').doc(auth.currentUser.uid).collection('learnProgress').get()
+    .then(snap => {
+      completed = {};
+      snap.forEach(doc => { if (doc.data().completed) completed[doc.id] = true; });
+      renderAll();
+    });
+}
+auth.onAuthStateChanged(() => loadProgress());
+
+function markDone() {
+  if (!AuthApp.requireLogin('진도를 저장하려면 로그인해주세요')) return;
+  const id = currentId;
+  db.collection('users').doc(auth.currentUser.uid).collection('learnProgress').doc(id)
+    .set({ completed: true, completedAt: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(() => {
+      completed[id] = true;
+      toast('완료로 표시했습니다 ✅');
+      renderAll();
+    });
+}
+
+/* ================= 렌더 ================= */
+function renderChapterList() {
+  const box = document.getElementById('chapterList');
+  box.innerHTML = '';
+  CHAPTERS.forEach(c => {
+    const isActive = c.id === currentId;
+    const isDone = !!completed[c.id];
+    const el = document.createElement('button');
+    el.className = 'chapter-item' + (isActive ? ' active' : '') + (isDone ? ' done' : '');
+    el.onclick = () => selectChapter(c.id);
+    el.innerHTML = `
+      <span class="cnum">${isDone ? '✓' : c.id.replace('ch','')}</span>
+      <span class="ctxt"><b>${c.title}</b><span>${c.duration}</span></span>`;
+    box.appendChild(el);
+  });
+  const doneCount = CHAPTERS.filter(c => completed[c.id]).length;
+  document.getElementById('progressLabel').textContent = `${doneCount} / ${CHAPTERS.length}`;
+  document.getElementById('progressBar').style.width = (doneCount / CHAPTERS.length * 100) + '%';
+}
+
+function renderVideo(c) {
+  const wrap = document.getElementById('videoWrap');
+  if (c.videoUrl) {
+    wrap.innerHTML = `<video id="player" controls src="${c.videoUrl}"></video>`;
+    const v = document.getElementById('player');
+    v.addEventListener('timeupdate', () => highlightTimeline(v.currentTime));
+  } else {
+    wrap.innerHTML = `
+      <div class="video-placeholder">
+        <div class="ico">🎬</div>
+        <b>영상 준비 중이에요</b>
+        <span>videoUrl을 채우면 이 자리에서 바로 재생됩니다. 아래 타임라인 내용으로 먼저 학습해보세요.</span>
+      </div>`;
+  }
+}
+
+function renderTimeline(c) {
+  const box = document.getElementById('timeline');
+  box.innerHTML = '';
+  c.timeline.forEach((seg, i) => {
+    const row = document.createElement('div');
+    row.className = 'tl-item';
+    row.dataset.t = seg.t;
+    row.onclick = () => seekTo(seg.t);
+    row.innerHTML = `<span class="ts">${seg.label}</span><p>${seg.text}</p>`;
+    box.appendChild(row);
+  });
+}
+
+function seekTo(t) {
+  const v = document.getElementById('player');
+  if (v) { v.currentTime = t; v.play(); }
+  highlightTimeline(t);
+}
+
+function highlightTimeline(currentTime) {
+  const rows = document.querySelectorAll('#timeline .tl-item');
+  let activeRow = rows[0];
+  rows.forEach(r => { if (parseFloat(r.dataset.t) <= currentTime) activeRow = r; });
+  rows.forEach(r => r.classList.toggle('active', r === activeRow));
+}
+
+function renderAll() {
+  const c = currentChapter();
+  renderChapterList();
+  renderVideo(c);
+  document.getElementById('chTitle').textContent = c.title;
+  document.getElementById('chDesc').textContent = c.desc;
+  renderTimeline(c);
+  if (c.timeline.length) highlightTimeline(0);
+
+  const idx = chapterIndex(currentId);
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === CHAPTERS.length - 1;
+  document.getElementById('doneBtn').textContent = completed[c.id] ? '✓ 완료됨' : '✓ 이 챕터 완료로 표시';
+}
+
+function selectChapter(id) { currentId = id; renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function gotoAdjacent(dir) {
+  const idx = chapterIndex(currentId) + dir;
+  if (idx < 0 || idx >= CHAPTERS.length) return;
+  selectChapter(CHAPTERS[idx].id);
+}
+
+renderAll();
+</script>
+</body>
+</html>
